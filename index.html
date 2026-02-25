@@ -46,61 +46,56 @@
 
 <script>
     // 1. PASTE YOUR NEW GOOGLE URL HERE
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVnHMSIeKhE1Oc9y7dbK52V6MQaCfF6lLsx8B8lALwGTU4XAxl6bynio2ZyQNYtSWf/exec";
+   const URL = "https://script.google.com/macros/s/AKfycbzVnHMSIeKhE1Oc9y7dbK52V6MQaCfF6lLsx8B8lALwGTU4XAxl6bynio2ZyQNYtSWf/exec";
 
-    function submitData(actionType) {
-        const name = document.getElementById('workerName').value.trim();
-        const sale = document.getElementById('totalSale').value || "0";
-        const bills = document.getElementById('numBills').value || "0";
+// 1. When the page loads, check if they already punched in/out today
+window.onload = function() {
+    const today = new Date().toDateString();
+    const savedDate = localStorage.getItem('lastEntryDate');
 
-        if(!name) { alert("Please enter your name!"); return; }
-
-        // Logic to prevent duplicate clicks for specific buttons
-        const singleActions = ["PUNCH IN", "PUNCH OUT", "STORE OPEN", "STORE CLOSED", "I AM ON LEAVE"];
-        const today = new Date().toDateString();
-        const lockKey = name + "_" + actionType + "_" + today;
-
-        if (singleActions.includes(actionType) && localStorage.getItem(lockKey)) {
-            alert("You already did " + actionType + " today!");
-            return;
-        }
-
-        // Disable button immediately
-        const btn = event.target;
-        const originalText = btn.innerText;
-        btn.disabled = true;
-        btn.innerText = "Sending...";
-
-        fetch(SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify({ 
-                name: name, 
-                action: actionType,
-                sale: sale,
-                bills: bills
-            })
-        })
-        .then(() => {
-            document.getElementById('statusMsg').innerText = "Last Action: " + actionType + " saved!";
-            if (singleActions.includes(actionType)) {
-                localStorage.setItem(lockKey, "true");
-                btn.innerText = actionType + " (DONE)";
-            } else {
-                btn.disabled = false;
-                btn.innerText = originalText;
-            }
-            // Clear sale inputs
-            document.getElementById('totalSale').value = "";
-            document.getElementById('numBills').value = "";
-        })
-        .catch(err => {
-            alert("Error: " + err);
-            btn.disabled = false;
-            btn.innerText = originalText;
-        });
+    // If it's a new day, clear the "locks"
+    if (savedDate !== today) {
+        localStorage.clear();
+        localStorage.setItem('lastEntryDate', today);
+    } else {
+        // If they already clicked these today, hide them again immediately
+        if (localStorage.getItem('PUNCH IN')) hideButton('btn-in');
+        if (localStorage.getItem('PUNCH OUT')) hideButton('btn-out');
     }
-</script>
+};
 
-</body>
-</html>
+function hideButton(className) {
+    const btns = document.getElementsByClassName(className);
+    for(let b of btns) b.style.display = 'none';
+}
+
+function send(act) {
+    const n = document.getElementById('name').value;
+    if(!n) return alert("Please enter your name first!");
+
+    // Disable button to prevent double-clicking while sending
+    event.target.disabled = true;
+    event.target.innerText = "Saving...";
+
+    fetch(URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({
+            name: n, 
+            action: act, 
+            sale: document.getElementById('sale').value, 
+            bills: document.getElementById('bills').value
+        })
+    }).then(() => {
+        alert(act + " Successful!");
+        
+        // 2. SAVE the action to the phone's memory so it stays hidden after refresh
+        if (act === 'PUNCH IN' || act === 'PUNCH OUT') {
+            localStorage.setItem(act, 'true');
+            location.reload(); // Refresh once to lock the buttons
+        } else {
+            event.target.disabled = false;
+            event.target.innerText = act;
+        }
+    });
+} 
