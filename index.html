@@ -2,50 +2,107 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Staff & Sales Log</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #eee; padding: 20px; text-align: center; }
-        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); max-width: 400px; margin: auto; }
-        input { width: 90%; padding: 15px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
-        button { width: 90%; padding: 15px; margin: 10px 0; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; color: white; }
-        .btn-in { background: #28a745; }
-        .btn-out { background: #dc3545; }
-        .btn-break { background: #ffc107; color: black; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background-color: #121212; /* Dark background for phone visibility */
+            color: white; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+        }
+        .container { 
+            background: #1e1e1e; 
+            padding: 20px; 
+            border-radius: 15px; 
+            width: 90%; 
+            max-width: 400px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
+            text-align: center;
+        }
+        h2 { color: #ffffff; margin-bottom: 20px; }
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 8px 0; 
+            border: 2px solid #333; 
+            border-radius: 8px; 
+            background: #2c2c2c; 
+            color: white; 
+            font-size: 16px; 
+            box-sizing: border-box;
+        }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .full { grid-column: span 2; }
+        button { 
+            width: 100%; 
+            padding: 15px; 
+            margin: 5px 0; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            color: white; 
+            cursor: pointer; 
+            transition: 0.2s;
+        }
+        /* Button Colors based on your image */
+        .btn-in { background: #2e7d32; }
+        .btn-break { background: #f9a825; color: black; }
+        .btn-store { background: #00838f; }
+        .btn-leave { background: #673ab7; }
+        .btn-out { background: #c62828; }
+        
+        button:disabled { background: #555 !important; color: #888; cursor: not-allowed; opacity: 0.7; }
+        #status { margin-top: 15px; font-size: 14px; color: #4caf50; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Staff Entry</h2>
-    <input type="text" id="name" placeholder="Enter Your Name">
-    <input type="number" id="sale" placeholder="Total Sale (Optional)">
-    <input type="number" id="bills" placeholder="No. of Bills (Optional)">
+    <h2>Staff & Sales Log</h2>
+    
+    <input type="text" id="name" placeholder="Enter Name" required>
+    <input type="number" id="sale" placeholder="Total Sale Amount">
+    <input type="number" id="bills" placeholder="Number of Bills">
 
-    <button id="punchIn" class="btn-in" onclick="sendData('PUNCH IN')">PUNCH IN</button>
-    <button id="breakStart" class="btn-break" onclick="sendData('BREAK START')">BREAK START</button>
-    <button id="breakEnd" class="btn-break" onclick="sendData('BREAK END')">BREAK END</button>
-    <button id="punchOut" class="btn-out" onclick="sendData('PUNCH OUT')">PUNCH OUT</button>
+    <button id="PUNCH_IN" class="btn-in full" onclick="send('PUNCH IN')">PUNCH IN</button>
+    
+    <div class="grid">
+        <button id="BREAK_START" class="btn-break" onclick="send('BREAK START')">BREAK START</button>
+        <button id="BREAK_END" class="btn-break" onclick="send('BREAK END')">BREAK END</button>
+        <button id="STORE_OPEN" class="btn-store" onclick="send('STORE OPEN')">STORE OPEN</button>
+        <button id="STORE_CLOSED" class="btn-store" onclick="send('STORE CLOSED')">STORE CLOSED</button>
+    </div>
+
+    <button id="I_AM_ON_LEAVE" class="btn-leave full" onclick="send('I AM ON LEAVE')">I AM ON LEAVE</button>
+    <button id="PUNCH_OUT" class="btn-out full" onclick="send('PUNCH OUT & SEND SALES')">PUNCH OUT & SEND SALES</button>
+
+    <div id="status"></div>
 </div>
 
 <script>
-    // 1. PASTE YOUR GOOGLE SCRIPT URL BELOW
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVnHMSIeKhE1Oc9y7dbK52V6MQaCfF6lLsx8B8lALwGTU4XAxl6bynio2ZyQNYtSWf/exec";
+    const URL = "PASTE_YOUR_GOOGLE_SCRIPT_URL_HERE";
 
-    function sendData(action) {
-        const name = document.getElementById('name').value;
+    function send(action) {
+        const name = document.getElementById('name').value.trim();
         const sale = document.getElementById('sale').value || "0";
         const bills = document.getElementById('bills').value || "0";
+        const status = document.getElementById('status');
 
         if (!name) {
             alert("Please enter your name!");
             return;
         }
 
-        // Disable buttons to prevent double-click
+        // ANTI-DUPLICATE SYSTEM: Disable all buttons immediately
         const buttons = document.querySelectorAll('button');
         buttons.forEach(b => b.disabled = true);
+        status.innerText = "Sending " + action + "... Please wait.";
 
         const data = {
             name: name,
@@ -54,18 +111,21 @@
             bills: bills
         };
 
-        fetch(SCRIPT_URL, {
+        fetch(URL, {
             method: "POST",
             mode: "no-cors",
             body: JSON.stringify(data)
         })
         .then(() => {
-            alert(action + " recorded successfully!");
-            location.reload(); // Refresh page
+            alert("✅ " + action + " Successful!");
+            status.innerText = "Done! Reloading...";
+            // Delay reload slightly so the user sees the success
+            setTimeout(() => { location.reload(); }, 1000);
         })
         .catch(err => {
-            alert("Error: Check your internet connection.");
+            alert("Error! Check connection.");
             buttons.forEach(b => b.disabled = false);
+            status.innerText = "";
         });
     }
 </script>
