@@ -3,132 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Staff & Sales Log</title>
+    <title>Brand Portal</title>
     <style>
-        body { 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            background-color: #121212; /* Dark background for phone visibility */
-            color: white; 
-            margin: 0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-        }
-        .container { 
-            background: #1e1e1e; 
-            padding: 20px; 
-            border-radius: 15px; 
-            width: 90%; 
-            max-width: 400px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
-            text-align: center;
-        }
-        h2 { color: #ffffff; margin-bottom: 20px; }
-        input { 
-            width: 100%; 
-            padding: 12px; 
-            margin: 8px 0; 
-            border: 2px solid #333; 
-            border-radius: 8px; 
-            background: #2c2c2c; 
-            color: white; 
-            font-size: 16px; 
-            box-sizing: border-box;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #121212; color: white; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background: #1e1e1e; padding: 20px; border-radius: 15px; width: 95%; max-width: 400px; text-align: center; border: 1px solid #333; }
+        
+        /* LOGO STYLING - Replace URL with your brand logo link */
+        .brand-logo { width: 150px; height: auto; margin-bottom: 20px; }
+
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #333; border-radius: 8px; background: #2c2c2c; color: white; font-size: 16px; box-sizing: border-box; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .full { grid-column: span 2; }
-        button { 
-            width: 100%; 
-            padding: 15px; 
-            margin: 5px 0; 
-            border: none; 
-            border-radius: 8px; 
-            font-size: 16px; 
-            font-weight: bold; 
-            color: white; 
-            cursor: pointer; 
-            transition: 0.2s;
-        }
-        /* Button Colors based on your image */
+        
+        button { width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; color: white; cursor: pointer; transition: 0.2s; }
+        button:active { transform: scale(0.98); }
+
+        /* Custom Button Colors */
         .btn-in { background: #2e7d32; }
         .btn-break { background: #f9a825; color: black; }
         .btn-store { background: #00838f; }
         .btn-leave { background: #673ab7; }
         .btn-out { background: #c62828; }
         
-        button:disabled { background: #555 !important; color: #888; cursor: not-allowed; opacity: 0.7; }
-        #status { margin-top: 15px; font-size: 14px; color: #4caf50; }
+        /* Hidden state for locked buttons */
+        .locked { display: none !important; }
+        #status-msg { font-size: 14px; margin-top: 10px; color: #4caf50; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Staff & Sales Log</h2>
+    <img src="https://ximiso.com/template/static/images/logo.png" alt="Brand Logo" class="brand-logo">
     
-    <input type="text" id="name" placeholder="Enter Name" required>
-    <input type="number" id="sale" placeholder="Total Sale Amount">
-    <input type="number" id="bills" placeholder="Number of Bills">
+    <input type="text" id="name" placeholder="Staff Name" required>
+    <input type="number" id="sale" placeholder="Total Sale Amount" inputmode="numeric">
+    <input type="number" id="bills" placeholder="Number of Bills" inputmode="numeric">
 
-    <button id="PUNCH_IN" class="btn-in full" onclick="send('PUNCH IN')">PUNCH IN</button>
+    <button id="btn_PUNCH_IN" class="btn-in full" onclick="submitData('PUNCH IN')">PUNCH IN</button>
     
     <div class="grid">
-        <button id="BREAK_START" class="btn-break" onclick="send('BREAK START')">BREAK START</button>
-        <button id="BREAK_END" class="btn-break" onclick="send('BREAK END')">BREAK END</button>
-        <button id="STORE_OPEN" class="btn-store" onclick="send('STORE OPEN')">STORE OPEN</button>
-        <button id="STORE_CLOSED" class="btn-store" onclick="send('STORE CLOSED')">STORE CLOSED</button>
+        <button class="btn-break" onclick="submitData('BREAK START')">BREAK START</button>
+        <button class="btn-break" onclick="submitData('BREAK END')">BREAK END</button>
+        
+        <button id="btn_STORE_OPEN" class="btn-store" onclick="submitData('STORE OPEN')">STORE OPEN</button>
+        <button id="btn_STORE_CLOSED" class="btn-store" onclick="submitData('STORE CLOSED')">STORE CLOSED</button>
     </div>
 
-    <button id="I_AM_ON_LEAVE" class="btn-leave full" onclick="send('I AM ON LEAVE')">I AM ON LEAVE</button>
-    <button id="PUNCH_OUT" class="btn-out full" onclick="send('PUNCH OUT & SEND SALES')">PUNCH OUT & SEND SALES</button>
+    <button id="btn_I_AM_ON_LEAVE" class="btn-leave full" onclick="submitData('I AM ON LEAVE')">I AM ON LEAVE</button>
+    <button id="btn_PUNCH_OUT" class="btn-out full" onclick="submitData('PUNCH OUT & SEND SALES')">PUNCH OUT & SEND SALES</button>
 
-    <div id="status"></div>
+    <div id="status-msg"></div>
 </div>
 
 <script>
-    const URL = "https://script.google.com/macros/s/AKfycbzVnHMSIeKhE1Oc9y7dbK52V6MQaCfF6lLsx8B8lALwGTU4XAxl6bynio2ZyQNYtSWf/exec";
+    // 1. UPDATE WITH YOUR ACTUAL APPS SCRIPT URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVnHMSIeKhE1Oc9y7dbK52V6MQaCfF6lLsx8B8lALwGTU4XAxl6bynio2ZyQNYtSWf/exec";
 
-    function send(action) {
+    // 2. Logic to hide one-time buttons if used today
+    window.onload = function() {
+        const today = new Date().toDateString();
+        const oncePerDayButtons = ['btn_PUNCH_IN', 'btn_STORE_OPEN', 'btn_STORE_CLOSED', 'btn_I_AM_ON_LEAVE', 'btn_PUNCH_OUT'];
+        
+        oncePerDayButtons.forEach(id => {
+            if (localStorage.getItem(id) === today) {
+                const btn = document.getElementById(id);
+                if (btn) btn.classList.add('locked');
+            }
+        });
+    };
+
+    function submitData(action) {
         const name = document.getElementById('name').value.trim();
         const sale = document.getElementById('sale').value || "0";
         const bills = document.getElementById('bills').value || "0";
-        const status = document.getElementById('status');
+        const msg = document.getElementById('status-msg');
 
-        if (!name) {
-            alert("Please enter your name!");
-            return;
-        }
+        if (!name) return alert("Please enter your name!");
 
-        // ANTI-DUPLICATE SYSTEM: Disable all buttons immediately
+        // Disable UI to prevent double-tap
         const buttons = document.querySelectorAll('button');
         buttons.forEach(b => b.disabled = true);
-        status.innerText = "Sending " + action + "... Please wait.";
+        msg.innerText = "Sending " + action + "...";
 
-        const data = {
-            name: name,
-            action: action,
-            sale: sale,
-            bills: bills
-        };
-
-        fetch(URL, {
+        fetch(SCRIPT_URL, {
             method: "POST",
             mode: "no-cors",
-            body: JSON.stringify(data)
+            body: JSON.stringify({ name, action, sale, bills })
         })
         .then(() => {
-            alert("✅ " + action + " Successful!");
-            status.innerText = "Done! Reloading...";
-            // Delay reload slightly so the user sees the success
-            setTimeout(() => { location.reload(); }, 1000);
+            alert("✅ " + action + " Successfully recorded!");
+            
+            // Map actions to their button IDs for locking
+            const actionMapping = {
+                "PUNCH IN": "btn_PUNCH_IN",
+                "STORE OPEN": "btn_STORE_OPEN",
+                "STORE CLOSED": "btn_STORE_CLOSED",
+                "I AM ON LEAVE": "btn_I_AM_ON_LEAVE",
+                "PUNCH OUT & SEND SALES": "btn_PUNCH_OUT"
+            };
+
+            // Only lock if it's in our one-time list (excludes breaks)
+            if (actionMapping[action]) {
+                localStorage.setItem(actionMapping[action], new Date().toDateString());
+            }
+
+            location.reload();
         })
         .catch(err => {
-            alert("Error! Check connection.");
+            alert("Error! Please check connection.");
             buttons.forEach(b => b.disabled = false);
-            status.innerText = "";
+            msg.innerText = "";
         });
     }
 </script>
-
 </body>
 </html>
