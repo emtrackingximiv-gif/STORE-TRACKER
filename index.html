@@ -1,103 +1,72 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Store Management Pro</title>
+    <title>Staff Portal</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 10px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        button { border: none; padding: 15px; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 14px; }
-        button:disabled { background: #ccc !important; cursor: not-allowed; color: #666; }
-        .btn-in { background: #28a745; grid-column: span 2; }
-        .btn-break { background: #ffc107; color: #000; }
-        .btn-store { background: #17a2b8; }
-        .btn-leave { background: #6f42c1; grid-column: span 2; }
-        .btn-out { background: #dc3545; grid-column: span 2; }
-        label { font-size: 14px; font-weight: bold; color: #555; display: block; margin-top: 10px; }
+        body { font-family: Arial, sans-serif; background: #eee; padding: 20px; text-align: center; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); max-width: 400px; margin: auto; }
+        input { width: 90%; padding: 15px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+        button { width: 90%; padding: 15px; margin: 10px 0; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; color: white; }
+        .btn-in { background: #28a745; }
+        .btn-out { background: #dc3545; }
+        .btn-break { background: #ffc107; color: black; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2 style="text-align:center">Staff & Sales Log</h2>
-    
-    <label>Staff Name</label>
-    <input type="text" id="workerName" placeholder="Enter Name">
+<div class="container">
+    <h2>Staff Entry</h2>
+    <input type="text" id="name" placeholder="Enter Your Name">
+    <input type="number" id="sale" placeholder="Total Sale (Optional)">
+    <input type="number" id="bills" placeholder="No. of Bills (Optional)">
 
-    <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin: 10px 0; border: 1px solid #eee;">
-        <label>Daily Sales (Only for Punch Out)</label>
-        <input type="number" id="totalSale" placeholder="Total Sale Amount">
-        <input type="number" id="numBills" placeholder="Number of Bills">
-    </div>
-    
-    <div class="grid">
-        <button id="btn-PUNCH-IN" class="btn-in" onclick="submitData('PUNCH IN')">PUNCH IN</button>
-        <button id="btn-BREAK-START" class="btn-break" onclick="submitData('BREAK START')">BREAK START</button>
-        <button id="btn-BREAK-END" class="btn-break" onclick="submitData('BREAK END')">BREAK END</button>
-        <button id="btn-STORE-OPEN" class="btn-store" onclick="submitData('STORE OPEN')">STORE OPEN</button>
-        <button id="btn-STORE-CLOSED" class="btn-store" onclick="submitData('STORE CLOSED')">STORE CLOSED</button>
-        <button id="btn-LEAVE" class="btn-leave" onclick="submitData('I AM ON LEAVE')">I AM ON LEAVE</button>
-        <button id="btn-PUNCH-OUT" class="btn-out" onclick="submitData('PUNCH OUT')">PUNCH OUT & SEND SALES</button>
-    </div>
-    <p id="statusMsg" style="color: blue; font-size: 12px; margin-top: 10px; text-align: center;"></p>
+    <button id="punchIn" class="btn-in" onclick="sendData('PUNCH IN')">PUNCH IN</button>
+    <button id="breakStart" class="btn-break" onclick="sendData('BREAK START')">BREAK START</button>
+    <button id="breakEnd" class="btn-break" onclick="sendData('BREAK END')">BREAK END</button>
+    <button id="punchOut" class="btn-out" onclick="sendData('PUNCH OUT')">PUNCH OUT</button>
 </div>
 
 <script>
-    // 1. PASTE YOUR NEW GOOGLE URL HERE
+    // 1. PASTE YOUR GOOGLE SCRIPT URL BELOW
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVnHMSIeKhE1Oc9y7dbK52V6MQaCfF6lLsx8B8lALwGTU4XAxl6bynio2ZyQNYtSWf/exec";
 
-    function submitData(actionType) {
-        const name = document.getElementById('workerName').value.trim();
-        const sale = document.getElementById('totalSale').value || "0";
-        const bills = document.getElementById('numBills').value || "0";
+    function sendData(action) {
+        const name = document.getElementById('name').value;
+        const sale = document.getElementById('sale').value || "0";
+        const bills = document.getElementById('bills').value || "0";
 
-        if(!name) { alert("Please enter your name!"); return; }
-
-        // Logic to prevent duplicate clicks for specific buttons
-        const singleActions = ["PUNCH IN", "PUNCH OUT", "STORE OPEN", "STORE CLOSED", "I AM ON LEAVE"];
-        const today = new Date().toDateString();
-        const lockKey = name + "_" + actionType + "_" + today;
-
-        if (singleActions.includes(actionType) && localStorage.getItem(lockKey)) {
-            alert("You already did " + actionType + " today!");
+        if (!name) {
+            alert("Please enter your name!");
             return;
         }
 
-        // Disable button immediately
-        const btn = event.target;
-        const originalText = btn.innerText;
-        btn.disabled = true;
-        btn.innerText = "Sending...";
+        // Disable buttons to prevent double-click
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(b => b.disabled = true);
+
+        const data = {
+            name: name,
+            action: action,
+            sale: sale,
+            bills: bills
+        };
 
         fetch(SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify({ 
-                name: name, 
-                action: actionType,
-                sale: sale,
-                bills: bills
-            })
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify(data)
         })
         .then(() => {
-            document.getElementById('statusMsg').innerText = "Last Action: " + actionType + " saved!";
-            if (singleActions.includes(actionType)) {
-                localStorage.setItem(lockKey, "true");
-                btn.innerText = actionType + " (DONE)";
-            } else {
-                btn.disabled = false;
-                btn.innerText = originalText;
-            }
-            // Clear sale inputs
-            document.getElementById('totalSale').value = "";
-            document.getElementById('numBills').value = "";
+            alert(action + " recorded successfully!");
+            location.reload(); // Refresh page
         })
         .catch(err => {
-            alert("Error: " + err);
-            btn.disabled = false;
-            btn.innerText = originalText;
+            alert("Error: Check your internet connection.");
+            buttons.forEach(b => b.disabled = false);
         });
     }
 </script>
