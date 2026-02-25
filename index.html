@@ -8,12 +8,14 @@
         .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
         input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        button { border: none; padding: 15px; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
-        .btn-main { background: #007bff; grid-column: span 2; }
+        button { border: none; padding: 15px; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 14px; }
+        button:disabled { background: #ccc !important; cursor: not-allowed; color: #666; }
+        .btn-in { background: #28a745; grid-column: span 2; }
         .btn-break { background: #ffc107; color: #000; }
+        .btn-store { background: #17a2b8; }
         .btn-leave { background: #6f42c1; grid-column: span 2; }
         .btn-out { background: #dc3545; grid-column: span 2; }
-        label { font-size: 14px; font-weight: bold; color: #555; }
+        label { font-size: 14px; font-weight: bold; color: #555; display: block; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -22,32 +24,52 @@
     <h2 style="text-align:center">Staff & Sales Log</h2>
     
     <label>Staff Name</label>
-    <input type="text" id="workerName" placeholder="Required">
+    <input type="text" id="workerName" placeholder="Enter Name">
 
-    <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin: 10px 0;">
-        <label>Daily Sales Report (Fill at Punch Out)</label>
+    <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin: 10px 0; border: 1px solid #eee;">
+        <label>Daily Sales (Only for Punch Out)</label>
         <input type="number" id="totalSale" placeholder="Total Sale Amount">
         <input type="number" id="numBills" placeholder="Number of Bills">
     </div>
     
     <div class="grid">
-        <button class="btn-main" onclick="submitData('PUNCH IN')">PUNCH IN</button>
-        <button class="btn-break" onclick="submitData('BREAK START')">BREAK START</button>
-        <button class="btn-break" onclick="submitData('BREAK END')">BREAK END</button>
-        <button class="btn-leave" onclick="submitData('I AM ON LEAVE')">I AM ON LEAVE</button>
-        <button class="btn-out" onclick="submitData('PUNCH OUT')">PUNCH OUT & SEND SALES</button>
+        <button id="btn-PUNCH-IN" class="btn-in" onclick="submitData('PUNCH IN')">PUNCH IN</button>
+        <button id="btn-BREAK-START" class="btn-break" onclick="submitData('BREAK START')">BREAK START</button>
+        <button id="btn-BREAK-END" class="btn-break" onclick="submitData('BREAK END')">BREAK END</button>
+        <button id="btn-STORE-OPEN" class="btn-store" onclick="submitData('STORE OPEN')">STORE OPEN</button>
+        <button id="btn-STORE-CLOSED" class="btn-store" onclick="submitData('STORE CLOSED')">STORE CLOSED</button>
+        <button id="btn-LEAVE" class="btn-leave" onclick="submitData('I AM ON LEAVE')">I AM ON LEAVE</button>
+        <button id="btn-PUNCH-OUT" class="btn-out" onclick="submitData('PUNCH OUT')">PUNCH OUT & SEND SALES</button>
     </div>
+    <p id="statusMsg" style="color: blue; font-size: 12px; margin-top: 10px; text-align: center;"></p>
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9hAHWNPoMHmH8Zw-VjCruEFCP96s96j9K86w3FrYBH7Q6Lu5aMFf10TMKDUV6tDvm/exec";
+    // 1. PASTE YOUR NEW GOOGLE URL HERE
+    const SCRIPT_URL = "YOUR_NEW_DEPLOYMENT_URL_HERE";
 
     function submitData(actionType) {
-        const name = document.getElementById('workerName').value;
-        const sale = document.getElementById('totalSale').value;
-        const bills = document.getElementById('numBills').value;
+        const name = document.getElementById('workerName').value.trim();
+        const sale = document.getElementById('totalSale').value || "0";
+        const bills = document.getElementById('numBills').value || "0";
 
         if(!name) { alert("Please enter your name!"); return; }
+
+        // Logic to prevent duplicate clicks for specific buttons
+        const singleActions = ["PUNCH IN", "PUNCH OUT", "STORE OPEN", "STORE CLOSED", "I AM ON LEAVE"];
+        const today = new Date().toDateString();
+        const lockKey = name + "_" + actionType + "_" + today;
+
+        if (singleActions.includes(actionType) && localStorage.getItem(lockKey)) {
+            alert("You already did " + actionType + " today!");
+            return;
+        }
+
+        // Disable button immediately
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = "Sending...";
 
         fetch(SCRIPT_URL, {
             method: 'POST',
@@ -60,15 +82,25 @@
             })
         })
         .then(() => {
-            alert("Entry Saved: " + actionType);
-            // Optional: Clear sales boxes after sending
+            document.getElementById('statusMsg').innerText = "Last Action: " + actionType + " saved!";
+            if (singleActions.includes(actionType)) {
+                localStorage.setItem(lockKey, "true");
+                btn.innerText = actionType + " (DONE)";
+            } else {
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+            // Clear sale inputs
             document.getElementById('totalSale').value = "";
             document.getElementById('numBills').value = "";
         })
-        .catch(err => alert("Error: " + err));
+        .catch(err => {
+            alert("Error: " + err);
+            btn.disabled = false;
+            btn.innerText = originalText;
+        });
     }
 </script>
 
 </body>
 </html>
-
