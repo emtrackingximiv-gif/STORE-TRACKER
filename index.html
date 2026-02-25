@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Punch Station</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f3; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        input { width: 100%; padding: 15px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 18px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        button { border: none; padding: 20px; border-radius: 12px; color: white; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
+        button:active { transform: scale(0.95); }
+        .btn-in { background: #2ecc71; grid-column: span 2; }
+        .btn-out { background: #e74c3c; grid-column: span 2; }
+        .btn-break { background: #f1c40f; color: #333; }
+        .btn-store { background: #34495e; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Store Management</h2>
+    <input type="text" id="workerName" placeholder="Enter Your Name">
+    
+    <div class="grid">
+        <button class="btn-in" onclick="submitData('PUNCH IN')">PUNCH IN</button>
+        <button class="btn-break" onclick="submitData('BREAK START')">BREAK START</button>
+        <button class="btn-break" onclick="submitData('BREAK END')">BREAK END</button>
+        <button class="btn-store" onclick="submitData('STORE OPEN')">STORE OPEN</button>
+        <button class="btn-store" onclick="submitData('STORE CLOSED')">STORE CLOSED</button>
+        <button class="btn-out" onclick="submitData('PUNCH OUT')">PUNCH OUT</button>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx07xpwm4xRojS-BQdWsHcIFIBfjzYXKLcnHooe4UXHsrnec7wopaFNTrJuo-EWnAc1/exec";
+
+    function submitData(actionType) {
+        const name = document.getElementById('workerName').value;
+        if(!name) { alert("Please enter your name first!"); return; }
+
+        // Visual feedback
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.innerText = "Saving...";
+        btn.disabled = true;
+
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ name: name, action: actionType })
+        })
+        .then(() => {
+            alert(actionType + " recorded successfully!");
+            btn.innerText = originalText;
+            btn.disabled = false;
+        })
+        .catch(err => alert("Error: " + err));
+    }
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Punch Station</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f3; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        input { width: 100%; padding: 15px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 18px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        button { border: none; padding: 20px; border-radius: 12px; color: white; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
+        button:active { transform: scale(0.95); }
+        .btn-in { background: #2ecc71; grid-column: span 2; }
+        .btn-out { background: #e74c3c; grid-column: span 2; }
+        .btn-break { background: #f1c40f; color: #333; }
+        .btn-store { background: #34495e; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Store Management</h2>
+    <input type="text" id="workerName" placeholder="Enter Your Name">
+    
+    <div class="grid">
+        <button class="btn-in" onclick="submitData('PUNCH IN')">PUNCH IN</button>
+        <button class="btn-break" onclick="submitData('BREAK START')">BREAK START</button>
+        <button class="btn-break" onclick="submitData('BREAK END')">BREAK END</button>
+        <button class="btn-store" onclick="submitData('STORE OPEN')">STORE OPEN</button>
+        <button class="btn-store" onclick="submitData('STORE CLOSED')">STORE CLOSED</button>
+        <button class="btn-out" onclick="submitData('PUNCH OUT')">PUNCH OUT</button>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = "PASTE_YOUR_COPIED_URL_HERE";
+
+    function submitData(actionType) {
+        const name = document.getElementById('workerName').value;
+        if(!name) { alert("Please enter your name first!"); return; }
+
+        // Visual feedback
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.innerText = "Saving...";
+        btn.disabled = true;
+
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ name: name, action: actionType })
+        })
+        .then(() => {
+            alert(actionType + " recorded successfully!");
+            btn.innerText = originalText;
+            btn.disabled = false;
+        })
+        .catch(err => alert("Error: " + err));
+    }
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Punch Station</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f3; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        input { width: 100%; padding: 15px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 18px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        button { border: none; padding: 20px; border-radius: 12px; color: white; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
+        button:active { transform: scale(0.95); }
+        .btn-in { background: #2ecc71; grid-column: span 2; }
+        .btn-out { background: #e74c3c; grid-column: span 2; }
+        .btn-break { background: #f1c40f; color: #333; }
+        .btn-store { background: #34495e; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Store Management</h2>
+    <input type="text" id="workerName" placeholder="Enter Your Name">
+    
+    <div class="grid">
+        <button class="btn-in" onclick="submitData('PUNCH IN')">PUNCH IN</button>
+        <button class="btn-break" onclick="submitData('BREAK START')">BREAK START</button>
+        <button class="btn-break" onclick="submitData('BREAK END')">BREAK END</button>
+        <button class="btn-store" onclick="submitData('STORE OPEN')">STORE OPEN</button>
+        <button class="btn-store" onclick="submitData('STORE CLOSED')">STORE CLOSED</button>
+        <button class="btn-out" onclick="submitData('PUNCH OUT')">PUNCH OUT</button>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = "PASTE_YOUR_COPIED_URL_HERE";
+
+    function submitData(actionType) {
+        const name = document.getElementById('workerName').value;
+        if(!name) { alert("Please enter your name first!"); return; }
+
+        // Visual feedback
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.innerText = "Saving...";
+        btn.disabled = true;
+
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ name: name, action: actionType })
+        })
+        .then(() => {
+            alert(actionType + " recorded successfully!");
+            btn.innerText = originalText;
+            btn.disabled = false;
+        })
+        .catch(err => alert("Error: " + err));
+    }
+</script>
+
+</body>
+</html>
